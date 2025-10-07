@@ -17,11 +17,27 @@
     <link rel="icon" href="/icon.svg" type="image/svg+xml">
     <link rel="apple-touch-icon" href="/icon.png">
 
-    <%# Includes all stylesheet files in app/assets/stylesheets %>
-    <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
+    <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+    <%= javascript_importmap_tags %>
   </head>
 
   <body>
-    <%= yield %>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+      <div class="container">
+        <a class="navbar-brand" href="#">Weather Forecast</a>
+      </div>
+    </nav>
+
+    <div class="container mt-4">
+      <% flash.each do |key, message| %>
+        <% bs_class = { notice: "info", alert: "danger", error: "danger", success: "success" }[key.to_sym] || "info" %>
+        <div class="alert alert-<%= bs_class %> alert-dismissible fade show" role="alert">
+          <%= message %>
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      <% end %>
+
+      <%= yield %>
+    </div>
   </body>
 </html>
