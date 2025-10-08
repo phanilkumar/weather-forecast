@@ -14,6 +14,8 @@ class ForecastNormalizer
     current = payload.fetch(:current)
     forecast = payload.fetch(:forecast)
 
+    raise ArgumentError, "Missing temperature data" unless current.dig("main", "temp")
+
     normalized_current = {
       temp_f: current.dig("main", "temp"),
       feels_like_f: current.dig("main", "feels_like"),
@@ -26,7 +28,10 @@ class ForecastNormalizer
     }
 
     # Aggregate 3-hour blocks into per-day hi/lo + representative condition
-    grouped = forecast.fetch("list", []).group_by { |e| Time.at(e["dt"]).to_date }
+    entries = forecast.fetch("list", [])
+    # Skip partial current day entries to avoid skewing daily hi/lo
+    entries = entries.reject { |e| Time.at(e["dt"]).to_date == Date.current }
+    grouped = entries.group_by { |e| Time.at(e["dt"]).to_date }
     daily = grouped.map do |date, entries|
       temps = entries.map { |e| e.dig("main", "temp") }.compact
       hi = temps.max

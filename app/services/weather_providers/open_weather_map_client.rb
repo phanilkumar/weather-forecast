@@ -18,8 +18,18 @@ module WeatherProviders
 
     def get_json(url, params)
       response = @http.get(url, params)
-      raise Error, "HTTP #{response.status}" unless response.success?
+      unless response.success?
+        snippet = begin
+          body = response.body.to_s
+          body[0, 200]
+        rescue
+          ""
+        end
+        raise Error, "HTTP #{response.status}: #{snippet}"
+      end
       JSON.parse(response.body)
+    rescue JSON::ParserError => e
+      raise Error, "Invalid JSON response: #{e.message}"
     end
 
     def default_http
