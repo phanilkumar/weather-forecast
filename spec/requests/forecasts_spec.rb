@@ -1,6 +1,10 @@
 require 'rails_helper'
 
 RSpec.describe "Forecasts", type: :request do
+  before do
+    # Clear rate limiting cache before each test to prevent interference
+    Rails.cache.clear
+  end
   describe "GET /" do
     it "renders new form" do
       get root_path
@@ -12,7 +16,7 @@ RSpec.describe "Forecasts", type: :request do
   describe "POST /forecast" do
     it "shows error for blank address" do
       post forecast_path, params: { address: "   " }
-      expect(response).to have_http_status(:unprocessable_entity)
+      expect(response).to have_http_status(:unprocessable_content)
       expect(response.body).to include("Please enter an address")
     end
 

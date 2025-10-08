@@ -6,7 +6,7 @@ class ForecastsController < ApplicationController
     address = params[:address].to_s
     if address.strip.empty?
       flash.now[:alert] = "Please enter an address"
-      return render :new, status: :unprocessable_entity
+      return render :new, status: :unprocessable_content
     end
 
     begin
@@ -15,7 +15,7 @@ class ForecastsController < ApplicationController
       render :show
     rescue ArgumentError => e
       flash.now[:alert] = e.message
-      render :new, status: :unprocessable_entity
+      render :new, status: :unprocessable_content
     rescue => e
       Rails.logger.error("Fetch forecast error: #{e.class}: #{e.message}")
       flash.now[:alert] = "Unable to retrieve forecast right now. Please try again."
