@@ -9,5 +9,3 @@ RSpec.describe Geocoding::NominatimClient do
     end
   end
 end
-
-

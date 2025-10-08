@@ -27,7 +27,7 @@ module WeatherProviders
     rescue Faraday::UnauthorizedError
       raise Unauthorized, "HTTP 401: unauthorized"
     rescue Faraday::ClientError => e
-      status = (e.response && e.response[:status]) || 'client_error'
+      status = (e.response && e.response[:status]) || "client_error"
       raise Error, "HTTP #{status}: #{e.message}"
     rescue JSON::ParserError => e
       raise Error, "Invalid JSON response: #{e.message}"
