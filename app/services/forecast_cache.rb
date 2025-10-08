@@ -20,6 +20,7 @@ class ForecastCache
     payload = value.merge("cached_at" => Time.current)
     @store.write(cache_key(zip_code), payload, expires_in: TTL)
     @store.write(stale_cache_key(zip_code), payload, expires_in: STALE_TTL)
+    ActiveSupport::Notifications.instrument("weather.cache_write", key: cache_key(zip_code))
     payload
   end
 
@@ -27,6 +28,7 @@ class ForecastCache
     payload = value.merge("cached_at" => Time.current)
     @store.write(latlon_key(lat, lon), payload, expires_in: TTL)
     @store.write(stale_latlon_key(lat, lon), payload, expires_in: STALE_TTL)
+    ActiveSupport::Notifications.instrument("weather.cache_write", key: latlon_key(lat, lon))
     payload
   end
 

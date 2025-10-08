@@ -18,17 +18,24 @@ class ForecastFetcher
     if geo.zip_code.present?
       cached = @cache.fetch_by_zip(geo.zip_code)
       if cached
-        Rails.logger.info("Cache hit for ZIP: #{geo.zip_code}")
+        Rails.logger.info("Cache HIT for ZIP: #{geo.zip_code}")
+        ActiveSupport::Notifications.instrument("weather.cache_hit", strategy: "zip", key: geo.zip_code)
         return [ cached, true ]
       else
         Rails.logger.info("Cache miss for ZIP: #{geo.zip_code}")
+        ActiveSupport::Notifications.instrument("weather.cache_miss", strategy: "zip", key: geo.zip_code)
       end
     end
 
     # Try lat/lon-based cache when ZIP is not present or cache missed
     latlon_cached = @cache.fetch_by_latlon(geo.latitude, geo.longitude)
     if latlon_cached
-      Rails.logger.info("Cache hit for lat/lon: #{geo.latitude},#{geo.longitude}")
+      Rails.logger.info("Cache HIT for lat/lon: #{geo.latitude},#{geo.longitude}")
+      ActiveSupport::Notifications.instrument(
+        "weather.cache_hit",
+        strategy: "latlon",
+        key: "#{geo.latitude.round(3)},#{geo.longitude.round(3)}"
+      )
       return [ latlon_cached, true ]
     end
 
