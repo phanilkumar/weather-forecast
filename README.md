@@ -8,6 +8,32 @@ Single GitHub link (code + README + tests):
 
 Rails 8 application that accepts a free-form address, geocodes it to latitude/longitude and postal code (ZIP/PIN), fetches current weather and 5‑day forecast from OpenWeatherMap, normalizes the data for display, and caches the result for 30 minutes by ZIP (with lat/lon fallback). A visible badge indicates cached results.
 
+## Quickstart
+
+```bash
+# 0) Clone
+git clone https://github.com/phanilkumar/weather-forecast.git
+cd weather-forecast
+
+# 1) Install gems
+bundle install
+
+# 2) Install Bootstrap build pipeline
+bin/rails css:install:bootstrap
+
+# 3) Configure environment (copy template)
+cp .env.example .env
+# then edit .env and set:
+# OWM_API_KEY=your_real_api_key
+
+# 4) Prepare database (Postgres dev/prod; SQLite in test)
+bin/rails db:prepare
+
+# 5) Run app (Foreman loads .env)
+bin/dev
+# or: export OWM_API_KEY=your_real_api_key && bin/rails s
+```
+
 ## Key Features
 
 - Address input → geocoding via Nominatim (OpenStreetMap)
@@ -161,6 +187,31 @@ VCR_RECORD=all bundle exec rspec
 ```
 
 Sensitive data is filtered as `<OWM_API_KEY>` in cassettes.
+
+## Useful development commands
+
+```bash
+# Lint (if RuboCop configured)
+bin/rubocop
+
+# Tail application logs
+tail -f log/development.log | grep -i weather
+
+# Toggle development cache
+bin/rails dev:cache
+```
+
+## Environment variables
+
+```bash
+# Required
+OWM_API_KEY=your_real_api_key
+
+# Optional (examples)
+GEOCODER_TIMEOUT=3
+NOMINATIM_TIMEOUT=3
+NOMINATIM_HOST=https://nominatim.openstreetmap.org
+```
 
 ## Security & Privacy
 
