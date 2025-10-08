@@ -45,6 +45,7 @@ gem "cssbundling-rails"
 
 # HTTP client
 gem "faraday"
+gem "faraday-retry"
 
 # Geocoding (Nominatim)
 gem "geocoder"
@@ -64,6 +65,9 @@ group :development, :test do
 
   # RSpec for testing
   gem "rspec-rails"
+
+  # Load .env for development/test
+  gem "dotenv-rails"
 end
 
 group :development do
@@ -75,4 +79,5 @@ group :test do
   # HTTP stubbing and recording
   gem "webmock", require: false
   gem "vcr", require: false
+  gem "sqlite3", "~> 2.1"
 end
