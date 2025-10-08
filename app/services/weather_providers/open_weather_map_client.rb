@@ -1,6 +1,7 @@
 module WeatherProviders
   class OpenWeatherMapClient
     class Error < StandardError; end
+    class Unauthorized < Error; end
 
     def initialize(http_client: default_http)
       @http = http_client
@@ -19,17 +20,24 @@ module WeatherProviders
     def get_json(url, params)
       response = @http.get(url, params)
       unless response.success?
-        snippet = begin
-          body = response.body.to_s
-          body[0, 200]
-        rescue
-          ""
-        end
+        snippet = safe_snippet(response)
         raise Error, "HTTP #{response.status}: #{snippet}"
       end
       JSON.parse(response.body)
+    rescue Faraday::UnauthorizedError
+      raise Unauthorized, "HTTP 401: unauthorized"
+    rescue Faraday::ClientError => e
+      status = (e.response && e.response[:status]) || 'client_error'
+      raise Error, "HTTP #{status}: #{e.message}"
     rescue JSON::ParserError => e
       raise Error, "Invalid JSON response: #{e.message}"
+    end
+
+    def safe_snippet(response)
+      body = response&.body.to_s
+      body[0, 200]
+    rescue
+      ""
     end
 
     def default_http
