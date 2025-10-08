@@ -6,7 +6,13 @@
         <%= form_with url: forecast_path, method: :post, local: true, data: { turbo: false } do |f| %>
           <div class="mb-3">
             <%= label_tag :address, "Address", class: "form-label" %>
-            <%= text_field_tag :address, params[:address], class: "form-control", placeholder: "1600 Amphitheatre Parkway, Mountain View, CA" %>
+            <%= text_field_tag :address,
+                  params[:address],
+                  class: "form-control",
+                  placeholder: "Enter city, address, or ZIP/PIN",
+                  required: true,
+                  minlength: 3,
+                  autocomplete: "off" %>
           </div>
           <div>
             <%= submit_tag "Get Forecast", class: "btn btn-primary", data: { disable_with: "Fetching forecast..." } %>
