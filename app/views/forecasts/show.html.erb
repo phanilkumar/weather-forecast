@@ -1,6 +1,7 @@
 <div class="d-flex align-items-center justify-content-between mb-3">
   <h2 class="mb-0"><%= @forecast.location_name %></h2>
-  <div>
+  <div class="d-flex align-items-center gap-2">
+    <%= button_to "Refresh", forecast_path(address: (@forecast.zip_code.presence || @forecast.location_name)), method: :patch, class: "btn btn-outline-primary btn-sm", form: { 'aria-label': 'Refresh forecast for current location' }, data: { turbo: false } %>
     <% if @forecast.from_cache? %>
       <span class="badge bg-warning text-dark">From Cache</span>
     <% end %>
@@ -12,40 +13,51 @@
 
 <div class="row g-3">
   <div class="col-md-4">
-    <div class="card h-100">
+    <div class="card h-100" role="region" aria-label="Current weather conditions">
       <div class="card-header">Current</div>
       <div class="card-body">
         <% cur = (@forecast.current || {}).with_indifferent_access %>
-        <p class="display-6"><%= cur[:temp_f]&.round %>°F</p>
-        <p class="text-muted mb-1">Feels like: <%= cur[:feels_like_f]&.round %>°F</p>
-        <p class="mb-1">Conditions: <%= cur[:description] || cur[:conditions] %></p>
-        <p class="mb-0">Humidity: <%= cur[:humidity] %>% • Wind: <%= cur[:wind_mph] %> mph</p>
+        <div class="mb-2">
+          <%= weather_icon(cur[:icon], alt: (cur[:description] || cur[:conditions])) %>
+        </div>
+        <p class="display-6"><%= format_temperature(cur[:temp_f]) %></p>
+        <p class="text-muted mb-1">Feels like: <%= format_temperature(cur[:feels_like_f]) %></p>
+        <p class="mb-1">Conditions: <%= (cur[:description] || cur[:conditions] || 'N/A') %></p>
+        <p class="mb-0">Humidity: <%= format_humidity(cur[:humidity]) %> • Wind: <%= format_wind(cur[:wind_mph]) %></p>
       </div>
     </div>
   </div>
 
   <div class="col-md-8">
-    <div class="card h-100">
+    <div class="card h-100" role="region" aria-label="Five day forecast">
       <div class="card-header">5-Day Forecast</div>
       <div class="card-body">
-        <div class="row row-cols-1 row-cols-md-3 g-3">
-          <% @forecast.daily.first(5).each do |d| %>
-            <div class="col">
-              <div class="border rounded p-3 h-100">
-                <div class="fw-bold"><%= d[:date].strftime('%a, %b %e') %></div>
-                <div>High: <%= d[:high_f]&.round %>°F</div>
-                <div>Low: <%= d[:low_f]&.round %>°F</div>
-                <div class="text-muted"><%= d[:conditions] %></div>
+        <% daily = Array(@forecast.daily) %>
+        <% if daily.present? %>
+          <div class="row row-cols-1 row-cols-md-3 g-3">
+            <% daily.first(5).each do |d| %>
+              <div class="col">
+                <div class="border rounded p-3 h-100" role="group" aria-label="<%= (d[:date].respond_to?(:strftime) ? d[:date].strftime('%A') : 'Day') %> forecast">
+                  <div class="mb-2">
+                    <%= weather_icon(d[:icon], alt: d[:conditions]) %>
+                  </div>
+                  <div class="fw-bold"><%= d[:date].respond_to?(:strftime) ? d[:date].strftime('%a, %b %e') : '—' %></div>
+                  <div>High: <%= format_temperature(d[:high_f]) %></div>
+                  <div>Low: <%= format_temperature(d[:low_f]) %></div>
+                  <div class="text-muted"><%= d[:conditions] || 'N/A' %></div>
+                </div>
               </div>
-            </div>
-          <% end %>
-        </div>
+            <% end %>
+          </div>
+        <% else %>
+          <p class="text-muted mb-0">No forecast data available</p>
+        <% end %>
       </div>
     </div>
   </div>
 </div>
 
-<div class="mt-3">
+<div class="mt-3 d-flex align-items-center gap-3">
   <%= link_to "Search another address", root_path, class: "btn btn-link" %>
   <% if @forecast.cached_at %>
     <span class="text-muted">Cached at: <%= l(@forecast.cached_at, format: :short) %></span>
