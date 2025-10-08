@@ -44,6 +44,7 @@ bin/dev
 - Importmap-pinned Bootstrap/Popper (vendored, offline-capable)
 - Robust error handling (invalid key, geocode failures, JSON parse)
 - Unit and request specs using RSpec, WebMock, and VCR cassettes
+- **Rate limiting**: Server-side protection using Rack::Attack with moderate limits
 
 ## Architecture & Object Decomposition
 
@@ -86,6 +87,47 @@ Design Patterns used:
 - Strategy-style provider client (pluggable if adding more providers)
 - Presenter for view concerns and cache badge logic
 
+## Rate Limiting
+
+The application includes server-side rate limiting using Rack::Attack to protect against abuse while allowing normal usage patterns.
+
+### Rate Limit Rules
+
+| Rule | Limit | Period | Purpose |
+|------|--------|---------|---------|
+| `req/ip` | 100 requests | 5 minutes | General rate limiting |
+| `forecast/ip` | 20 requests | 1 minute | Weather API protection |
+| `rapid/ip` | 5 requests | 10 seconds | Rapid request protection |
+
+### Features
+
+- **Moderate Limits**: Not too strict, not too permissive - allows normal usage while preventing abuse
+- **Health Check Exemption**: `/up` endpoint is exempt from rate limiting
+- **Development Exemption**: Localhost requests in development are exempt
+- **Cache Integration**: Uses Rails cache store (memory in dev/test, Redis in production)
+- **Logging**: Rate limit hits are logged for monitoring
+- **Custom Headers**: Includes `X-RateLimit-*` headers in responses
+
+### Configuration
+
+Rate limiting is configured in `config/initializers/rack_attack.rb` and uses Rails cache store for persistence. The middleware is automatically loaded in the application.
+
+### Testing
+
+Rate limiting functionality is tested with RSpec in `spec/requests/rate_limiting_spec.rb`:
+
+```bash
+# Run rate limiting tests
+bundle exec rspec spec/requests/rate_limiting_spec.rb
+```
+
+Tests verify:
+- Normal request rates are allowed
+- Health check endpoint is exempt
+- Rate limiting triggers after exceeding limits
+- 429 status codes are returned when rate limited
+- Rate limit headers are included in responses
+
 ## Scalability & Resilience Considerations
 
 - Caching: Redis in production; MemoryStore in development
@@ -93,6 +135,7 @@ Design Patterns used:
 - Retries/Timeouts: Faraday retry middleware; short timeouts to bound latency
 - Observability: cache hit/miss/write instrumented; structured logs
 - Background jobs (optional): Solid Queue-ready job shown in documentation for optimistic UX
+- Rate limiting: Rack::Attack with moderate limits to prevent abuse while allowing normal usage
 
 ## Naming & Code Quality
 
