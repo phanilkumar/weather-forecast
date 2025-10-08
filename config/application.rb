@@ -38,5 +38,13 @@ module WeatherForecast
 
     # Don't generate system test files.
     config.generators.system_tests = nil
+
+    # Configure Rack::Attack to use Rails cache store
+    config.after_initialize do
+      Rack::Attack.cache.store = Rails.cache
+    end
+
+    # Add Rack::Attack middleware
+    config.middleware.use Rack::Attack
   end
 end
