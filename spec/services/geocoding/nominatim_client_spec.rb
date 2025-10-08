@@ -21,9 +21,9 @@ RSpec.describe Geocoding::NominatimClient do
       expect(res.country).to eq('USA')
     end
 
-    it 'returns nil when no results' do
+    it 'raises helpful error when no results' do
       allow(Geocoder).to receive(:search).and_return([])
-      expect(described_class.new.geocode('nowhere')).to be_nil
+      expect { described_class.new.geocode('nowhere') }.to raise_error(ArgumentError, /not found/i)
     end
 
     it 'raises for blank address' do
