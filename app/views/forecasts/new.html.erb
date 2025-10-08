@@ -3,13 +3,13 @@
     <div class="card">
       <div class="card-header">Enter Address</div>
       <div class="card-body">
-        <%= form_with url: forecast_path, method: :post, local: true do |f| %>
+        <%= form_with url: forecast_path, method: :post, local: true, data: { turbo: false } do |f| %>
           <div class="mb-3">
             <%= label_tag :address, "Address", class: "form-label" %>
             <%= text_field_tag :address, params[:address], class: "form-control", placeholder: "1600 Amphitheatre Parkway, Mountain View, CA" %>
           </div>
           <div>
-            <%= submit_tag "Get Forecast", class: "btn btn-primary" %>
+            <%= submit_tag "Get Forecast", class: "btn btn-primary", data: { disable_with: "Fetching forecast..." } %>
           </div>
         <% end %>
       </div>
