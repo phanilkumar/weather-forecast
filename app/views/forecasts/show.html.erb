@@ -15,11 +15,11 @@
     <div class="card h-100">
       <div class="card-header">Current</div>
       <div class="card-body">
-        <% cur = @forecast.current %>
-        <p class="display-6"><%= cur["temp_f"]&.round %>°F</p>
-        <p class="text-muted mb-1">Feels like: <%= cur["feels_like_f"]&.round %>°F</p>
-        <p class="mb-1">Conditions: <%= cur["description"] || cur["conditions"] %></p>
-        <p class="mb-0">Humidity: <%= cur["humidity"] %>% • Wind: <%= cur["wind_mph"] %> mph</p>
+        <% cur = (@forecast.current || {}).with_indifferent_access %>
+        <p class="display-6"><%= cur[:temp_f]&.round %>°F</p>
+        <p class="text-muted mb-1">Feels like: <%= cur[:feels_like_f]&.round %>°F</p>
+        <p class="mb-1">Conditions: <%= cur[:description] || cur[:conditions] %></p>
+        <p class="mb-0">Humidity: <%= cur[:humidity] %>% • Wind: <%= cur[:wind_mph] %> mph</p>
       </div>
     </div>
   </div>
