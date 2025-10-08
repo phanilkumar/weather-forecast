@@ -45,5 +45,6 @@ VCR.configure do |c|
   c.cassette_library_dir = 'spec/cassettes'
   c.hook_into :webmock
   c.default_cassette_options = { record: (ENV['CI'] ? :none : :new_episodes) }
+  c.filter_sensitive_data('<OWM_API_KEY>') { ENV['OWM_API_KEY'] }
   c.configure_rspec_metadata!
 end
