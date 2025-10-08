@@ -81,3 +81,5 @@ group :test do
   gem "vcr", require: false
   gem "sqlite3", "~> 2.1"
 end
+
+gem "climate_control", "~> 1.2"
