@@ -1,0 +1,20 @@
+<div class="row justify-content-center">
+  <div class="col-md-8">
+    <div class="card">
+      <div class="card-header">Enter Address</div>
+      <div class="card-body">
+        <%= form_with url: forecast_path, method: :post, local: true do |f| %>
+          <div class="mb-3">
+            <%= label_tag :address, "Address", class: "form-label" %>
+            <%= text_field_tag :address, params[:address], class: "form-control", placeholder: "1600 Amphitheatre Parkway, Mountain View, CA" %>
+          </div>
+          <div>
+            <%= submit_tag "Get Forecast", class: "btn btn-primary" %>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>
+
+
