@@ -11,12 +11,28 @@ module Geocoding
     )
 
     def geocode(address)
-      raise ArgumentError, "address must be present" if address.to_s.strip.empty?
+      query = address.to_s.strip
+      raise ArgumentError, "Address must be present" if query.empty?
 
-      records = ::Geocoder.search(address)
-      first = records.first
-      return nil if first.nil?
+      cache_key = "geocode:#{query.downcase}"
+      result = Rails.cache.fetch(cache_key, expires_in: 1.hour) do
+        records = ::Geocoder.search(query)
+        first = records.first
+        first ? build_result(first) : :not_found
+      end
 
+      if result == :not_found
+        raise ArgumentError, query.length < 3 ?
+          "Address too short. Please enter a more specific location." :
+          "Location '#{query}' not found. Please check spelling and try again."
+      end
+
+      result
+    end
+
+    private
+
+    def build_result(first)
       data = first.data
       addr = (data && data["address"]) || {}
 
